@@ -1,11 +1,20 @@
 const Discord = require('discord.js');
-const {prefix, token, giphyToken, badWords} = require('./config.json')
+const fs = require('fs');
+const configFileName = './config.json';
+const file = require(configFileName);
+const {prefix, giphyToken, badWords, reactionMsgID} = require('./config.json');
 const client = new Discord.Client();
+require('dotenv-flow').config();
+
+const config = {
+  token: process.env.TOKEN,
+  giphyToken: process.env.GIPHYTOKEN
+}
 
 //Giphy setup
 
 var GphApiClient = require('giphy-js-sdk-core')
-giphy = GphApiClient(giphyToken)
+giphy = GphApiClient(config.giphyToken)
 
 //Starting Bot
 
@@ -17,26 +26,26 @@ client.on('ready', () => {
         type: 'PLAYING'
     },
     status: 'online'
-  })
+  });
 });
 
 //Welcome message
 
 client.on('guildMemberAdd', member => {
-    let nazwa = member.guild.channels.cache.find(ch => ch.name === 'zasady'); 
+    let zasady = member.guild.channels.cache.find(ch => ch.name === 'zasady'); 
     member.guild.channels.cache.find(ch => ch.name === 'powitalny').send({embed: { 
         color: 10181046,
         title: "**Witaj!**",
-        description: "**Czuwaj **" + `<@${member.user.id}>` + "**! Rozsiądź się wygodnie przy hufcowym ognisku!**",
+        description: "**Czuwaj **" + `<@${member.user.id}>` + "**! Rozsiądź się wygodnie przy naszym ognisku!**",
         fields: [{
             name: "**REGULAMIN**",
-            value: `Aby zaakceptować regulamin przejdź na kanał ${nazwa} i kliknij odpowiednią reakcję.`
+            value: `Aby zaakceptować regulamin przejdź na kanał ${zasady} i kliknij odpowiednią reakcję.`
           }
         ],
         timestamp: new Date(),
         footer: {
           icon_url: client.user.AvatarURL,
-          text: "© #ZHPINO 2020"
+          text: "© Scout Robot 2020"
         }
         }});
 });
@@ -48,13 +57,13 @@ client.on('message', async message => {
     let foundInText = false;
     for (var i in badWords) { // loops through the blacklisted list
       if (message.content.toLowerCase().includes(badWords[i].toLowerCase())) foundInText = true;
-    }
+    };
 
-      if (foundInText) {
+    if (foundInText) {
         message.delete({ timeout: 100, reason: 'Słowa!' });
         message.channel.send('**Uważaj na słowa!** :rage:').then(msg => msg.delete({ timeout: 1000, reason: 'It had to be done.' }));
         return;
-    }
+    };
 });
 
 //Moderation commands
@@ -70,6 +79,39 @@ client.on('message', msg => {
         msg.delete();
         msg.channel.send(text);
     };
+
+    if(command === "reactmsg")
+    {
+      msg.delete();
+      let channel = client.channels.cache.find(channel => channel.name === 'zasady');
+      channel.send({embed: {
+        color: 15158332,
+        title: "**REGULAMIN SERWERA**",
+        description: "Aby zatwierdzić regulamin kliknij reakcję pod wiadomością. Po zatwierdzeniu otrzymasz rolę, która umożliwi przeglądanie reszty kanałów.",
+        fields: [{
+            name: "**Zasady**",
+            value: `*Pierwsza zasada.*
+            *Druga zasada.*
+            *Trzecia zasada*
+            *Czwarta zasada*`
+          }
+        ],
+        footer: {
+          text: "© Scout Robot 2020"
+        }
+        }})
+          .then(message => {
+          msg.channel.messages.fetch(reactionMsgID).then(oldmsg => {
+            oldmsg.delete().catch(console.error);
+          }).catch(console.error);
+          message.react("✅").catch(console.error);
+          file.reactionMsgID = message.id
+          fs.writeFile(configFileName, JSON.stringify(file), function writeJSON(err) {
+          if (err) return console.log(err);
+          console.log('writing to ' + configFileName);
+          });
+        });
+    }
   
     if (command === "kick") 
     {
@@ -162,10 +204,10 @@ client.on('message', msg => {
 
       if (amount > 100) return msg.reply('Nie możesz usunąć więcej niż 100 wiadomości na raz!'); // Checks if the `amount` integer is bigger than 100
       if (amount < 1) return msg.reply('Musisz usunąć minimum 1 wiadomość!'); // Checks if the `amount` integer is smaller than 1
-
+        msg.delete();
         msg.channel.messages.fetch({ limit: amount }).then(messages => { // Fetches the messages
         msg.channel.bulkDelete(messages // Bulk deletes all messages that have been fetched and are not older than 14 days (due to the Discord API)
-      )});
+      ).catch(console.error)});
     };
 
     if(command === 'modhelp') {
@@ -178,7 +220,8 @@ client.on('message', msg => {
            value: `${prefix}modhelp - *wyświetla listę komend dla moderacji*
            ${prefix}kick @nick <powód> - *wyrzuca osobę z serwera. Przy podawaniu powodu zastąp spacje znakiem podłogi*
            ${prefix}ban @nick <powód> - *banuje osobę. Przy podawaniu powodu zastąp spacje znakiem podłogi*
-           ${prefix}clear <liczba wiadomości> - *usuwa daną ilość wiadomości*`
+           ${prefix}clear <liczba wiadomości> - *usuwa podaną ilość wiadomości*
+           ${prefix}reactmsg - *wysyła reactionRolesMessage*`
          }
        ],
        footer: {
@@ -193,6 +236,20 @@ client.on('message', msg => {
 
 client.on('message', msg => {
 
+    if(msg.content.includes(`co?`))
+    {
+      giphy.search('gifs', {"q": "meat gif"})
+      .then((response) => {
+          var totalResponses = response.data.length;
+          var responseIndex = Math.floor((Math.random()*10)+1) % totalResponses;
+          var responseFinal = response.data[responseIndex];
+          msg.reply("**Miencho! 1:0 dla mnie!**", {
+              files: [responseFinal.images.fixed_height.url]
+          })            }).catch(() => {
+              msg.channel.send('O nie! Wystąpił błąd przy wczytywaniu GIFa :sob:');
+          })
+    };
+
     if (!msg.content.startsWith(prefix) && msg.author.bot) return;
 
     const args = msg.content.slice(prefix.length).trim().split(/ +/g);
@@ -200,7 +257,7 @@ client.on('message', msg => {
 
     if (command === "ping")
     {
-        msg.reply('Pong!');
+        msg.reply('pong!');
     };
 
     if(command === "powiedz")
@@ -231,20 +288,6 @@ client.on('message', msg => {
                   msg.channel.send('O nie! Wystąpił błąd przy wczytywaniu GIFa :sob:');
               })
 
-    };
-
-    if(msg.content.includes(`co?`))
-    {
-      giphy.search('gifs', {"q": "meat gif"})
-      .then((response) => {
-          var totalResponses = response.data.length;
-          var responseIndex = Math.floor((Math.random()*10)+1) % totalResponses;
-          var responseFinal = response.data[responseIndex];
-          msg.reply("**Miencho! 1:0 dla mnie!**", {
-              files: [responseFinal.images.fixed_height.url]
-          })            }).catch(() => {
-              msg.channel.send('O nie! Wystąpił błąd przy wczytywaniu GIFa :sob:');
-          })
     };
 
     //Funkcja losująca liczby
@@ -282,7 +325,8 @@ client.on('message', msg => {
            name: "**KOMENDY**",
            value: `${prefix}help - *wyświetla listę komend*
            ${prefix}gif <tematyka gifa - *wyświetla losowy gif (temat musi być w języku angielskim)*
-           ${prefix}iq <@nick> - *generuje losowe IQ użytkownika*`
+           ${prefix}iq <@nick> - *generuje losowe IQ użytkownika*
+           ${prefix}powiedz - *BOT napisze Twoją wiadomość.*`
          }
        ],
        footer: {
@@ -293,4 +337,4 @@ client.on('message', msg => {
   
 });
 
-client.login(token);
+client.login(config.token);
