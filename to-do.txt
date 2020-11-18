@@ -1,0 +1,27 @@
+working features 
+{
+    message said by bot (MOD COMMAND);
+    kick & ban (MOD COMMAND);
+    delete selected message by msg ID (MOD COMMAND);
+    clear chat (MOD COMMAND);
+    command list (MOD & USER COMMAND);
+    embed with roles (reaction roles from other bot);
+    co? miencho! feature (USER COMMAND);
+    ping check (USER COMMAND);
+    bot says what you want (USER COMMAND);
+    fun comands for everyone - iq, gifs, custom commands;
+};
+
+to solve
+{
+    bad words - needs more investigation;
+    welcome message - solution: needs 24/7 hosting;
+    rich presence - needs more data;
+    nfsw gifs should not be there;
+};
+
+future plans
+{
+    reaction roles;
+    music bot;
+};
