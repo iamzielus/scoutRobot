@@ -84,11 +84,7 @@ client.on('message', msg => {
     const args = msg.content.slice(prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
     
-    if(command === "say"){
-        let text = args.join(" ");
-        msg.delete();
-        msg.channel.send(text);
-    };
+  
     /*
     if(command === "reactmsg")
     {
@@ -206,38 +202,6 @@ client.on('message', msg => {
       }
     };
 
-    if (command === 'clear') {
-      const args = msg.content.split(' ').slice(1); // All arguments behind the command name with the prefix
-      const amount = Number(args.join(' ')); // Amount of messages which should be deleted
-
-      if (!amount) return msg.reply('Nie podałeś liczby wiadomości do usunięcia'); // Checks if the `amount` parameter is given
-      if (isNaN(amount)) return msg.reply('Podaj prawidłową liczbę wiadomości'); // Checks if the `amount` parameter is a number. If not, the command throws an error
-
-      if (amount > 100) return msg.reply('Nie możesz usunąć więcej niż 100 wiadomości na raz!'); // Checks if the `amount` integer is bigger than 100
-      if (amount < 1) return msg.reply('Musisz usunąć minimum 1 wiadomość!'); // Checks if the `amount` integer is smaller than 1
-        msg.delete();
-        msg.channel.messages.fetch({ limit: amount }).then(messages => { // Fetches the messages
-        msg.channel.bulkDelete(messages // Bulk deletes all messages that have been fetched and are not older than 14 days (due to the Discord API)
-      ).catch(console.error)});
-      msg.channel.send(`:recycle: **Usunięto ${amount} wiadomości.**`).then(message => {
-        message.delete({timeout:5000});
-      });      
-    };
-
-    if (command === 'censore')
-    {
-      let censoredID = msg.content.split(' ').slice(1);
-      msg.delete();
-      msg.channel.messages.fetch(`${censoredID}`)
-      .then(message => {
-      message.delete().then(msg.channel.send(`${client.emojis.cache.find(emoji => emoji.name === 'weewoo')} ***Ocenzurowano wiadomość.***`).then(info => {info.delete({timeout: 2000})}))
-      }).catch(err => {
-        msg.reply(`:x:***nie można usunąć wiadomości.***`).then(replyMsg => {replyMsg.delete({timeout:2000})});
-        console.error(err);
-      });
-
-    };
-
     if(command === 'modhelp') {
       msg.channel.send({embed: {
        color: 15158332,
@@ -289,24 +253,108 @@ client.on('message', msg => {
    title: "**Regulamin**",
    description: "**Zostaw reakcję, aby potwierdzić zapoznanie się z regulaminem.**",
    fields: [{
-       name: "**OGÓLNE**",
-       value: `◈ Uczestników serwera obowiązuje przestrzeganie postanowień niniejszego regulaminu.
-       ◈ Discord jest platformą do wspólnej integracji widowni z Twórcą. Poza Regulaminem Społeczności tego serwera Użytkownik obowiązany jest przestrzegać również Warunków Usługi Discord (dostępnych jako ToS: https://discordapp.com/terms). 
-       ◈ Uczestniczących w serwerze obowiązuje się  ponadto przestrzeganie Prawa Harcerskiego.
-       ◈ Ostateczna interpretacja niniejszego regulaminu należy do administracji/właściciela serwera. 
-       ◈ Nieprzestrzeganie powyższych norm może doprowadzić do wydalenia takiej osoby z serwera. 
-       ◈ Administratorzy zastrzegają sobie możliwość dokonywania zmian w niniejszym regulaminie po jego opublikowaniu. 
-       ◈ Zmiany regulaminu oraz inne istotne decyzje administracja będzie ogłaszać na kanale "Informację"`,
+       name: "**OGÓLNE ZASADY**",
+       value: `◈ Poza Regulaminem Społeczności tego serwera przestrzegaj również Warunków Usługi Discord (https://discordapp.com/terms).
+       ◈ Pamiętaj o przestrzeganiu Prawa Harcerskiego.
+       ◈ Żadnego nękania, mowy nienawiści czy obelg na tle rasowym i nie tylko. Bądźmy wszyscy przyjaźni i nie kłóćmy się.
+       ◈ Nie reklamuj zewnętrznych stron, innych serwerów Discord oraz akcji na kanałach głosowych/tekstowych (za wyjątkiem zgody <@&703370198740107266> ).
+       ◈ Zakaz ustawiania sobie obraźliwego nicku/avatar’a oraz podszywania się. Administracja zastrzega sobie prawo do zmiany nieodpowiedniego pseudonimu.
+       ◈ Zakaz wstawiania zdjęć oraz upubliczniania danych osobowych użytkowników serwera bez ich zgody.
+       ◈ Administracja może zmienić regulamin w każdej chwili. Zmiany regulaminu oraz inne istotne decyzje będą ogłaszane na kanale <#780468785499996180>
+       ◈ Administracja może karać za rzeczy nieobecne w regulaminie. 
+       ◈ Nieznajomość regulaminu nie zwalnia z jego przestrzegania.`,
+   }]
+   }});
+   msg.channel.send({embed: {
+    color: 10181046,
+    fields: [
+    {
+     name: "**REGULAMIN KANAŁÓW TEKSTOWYCH**",
+     value: `◈ Używaj kanałów zgodnie z ich przeznaczeniem.
+     ◈ Zakaz zamieszczania treści NSFW/NSFL.
+     ◈ Nie spamuj, nie flooduj oraz nie nadużywaj caps locka.
+     ◈ Zachowaj kulturę osobistą i języka. Pamiętaj, o szacunku wobec innych użytkowników.`,
+ },
+ {
+   name: "**REGULAMIN KANAŁÓW GŁOSOWYCH**",
+   value: `◈ Używaj kanałów zgodnie z ich przeznaczeniem.
+   ◈ Nie używaj przesterów celowo.
+   ◈ Nie przeszkadzaj innym w dyskusji.
+   ◈ Zachowuj kulturę w swoich wypowiedziach.
+   ◈ Nagrywanie rozmów jest zabronione (wyjątkiem jest zgoda każdego z uczestników rozmowy).`,
+ }],
+    footer: {
+      text: "© Scout Robot 2020"
+    }
+    }}).then(message => {
+    message.react("✅").catch(console.error);
+   });
+};
+
+if(command === 'changelog') {
+  msg.delete();
+  msg.channel.send({embed: {
+   color: 10181046,
+   title: "**CHANGELOG**",
+   description: "**Przedstawienie zmian na serwerze - na dzień 23.11.2020**",
+   fields: [{
+       name: "**AKTUALIZACJA REGULAMINU**",
+       value: `◈ Zmieniono regulamin. Prosimy o zapoznanie się z zaktualizowaną treścią oraz zostawienie reakcji pod wiadomością.`,
    },
    {
-    name: "**ZASADY KANAŁÓW TEKSTOWYCH**",
-    value: `◈ Nakaz ograniczania używania wulgaryzmów na kanałach tekstowych a także głosowych. ( SZANUJMY SIEBIE NA WZAJEM, W KONCU KAZDY HARCERZ I HARCERKA TO WIELKA RODZINA)
-    ◈ Zakazane jest prowokowanie kłótni, dyskusji które mają negatywny wpływ na serwer. ( Wszystkie spory rozwiązujemy na kanale "skargi, zguby, zażalenia"
-    ◈ Zakaz wykorzystywania, oszukiwania i szantażowania innych użytkowników.
-    ◈ Zakaz obrażania graczy, administracji i serwera oraz działania na ich szkody.
-    ◈ Wszelkiego rodzaju błędy na serwerze należy zgłaszać do Administracji ( każdy popełnia błędy, my też mamy do tego prawo- grunt to je poprawiać :blush:)
-    ◈ Zabronione jest wysyłanie linków lub plików zawierających jakiekolwiek treści wulgarne/rasistowskie/pornograficzne itp.
-    ◈ Zakaz reklamowania zewnętrznych stron i innych serwerów - wyjątkiem jest zgoda Administracji ( <@&703370198740107266> , <@&703370367523094548> ) np. jak chodzi o zbiórkę na szczytne cele itd.`,
+    name: "**UPORZĄDKOWANIE KANAŁÓW**",
+    value: `◈ Zaktulizowano nazwy i opisy kanałów.
+    ◈ Dodano kilka knowych kanałów oraz kategorii.`,
+},
+{
+  name: "**NOWOŚCI NA SERWERZE**",
+  value: `◈ Stworzono prywatne kanały dla jednostek (zastępów/drużyn etc.) - szczegóły na kanale <#780183793046126633> .
+  ◈ Stworzono kanały dla poszczególnych funkcyjnych. Aby otrzymać rolę z dostępem do kanału należy zgłosić się do <@&778984132117004349> .`,
+}],
+   footer: {
+     text: "© Scout Robot 2020"
+   }
+   }}).then(message => {
+    message.react("✅").catch(console.error);
+   });
+  msg.channel.send(`@everyone **Zapraszamy do zapoznania się ze zmianami!**`);
+};
+
+if(command === 'chpomoc') {
+  msg.delete();
+  msg.channel.send({embed: {
+   color: 10181046,
+   title: "**KANAŁ POMOCY**",
+   fields: [{
+       name: "**Do czego służy ten kanał?**",
+       value: `*Ten kanał służy do komunikacji z administracją serwera w przypadku jakichkolwiek problemów/pytań/próśb.
+       Staff stara się pełnić całodobową służbę na serwerze, jednak prosimy o wyrozumiałość w przypadku późnej odpowiedzi.*`,
+   }],
+   footer: {
+     text: "© Scout Robot 2020"
+   }
+   }}).then(message => {
+    message.react("✅").catch(console.error);
+   });
+};
+
+if(command === 'priv') {
+  msg.delete();
+  msg.channel.send({embed: {
+   color: 10181046,
+   title: "**STREFA PRYWATNA**",
+   description: `*FAQ - Strefa prywatna*`,
+   fields: [{
+       name: "**Do czego służy ta kategoria?**",
+       value: `*Wiele drużyn przenosi swoją działalność do sieci. Część z nich wybiera Discorda jako platformę działania. Chcemy umożliwić zastępom, drużynom etc. organizację pracy zdalnej.
+       W tym celu powstała ta kategoria. Jeśli chcesz stworzyć kanał tekstowy i/lub głosowy dla swojej jednostki - złóż zgłoszenie zgodnie z poniższym wzorem.*`,
+   },
+   {
+    name: "**WZÓR**",
+    value: `*Nazwa jednostki:
+    Twoja funkcja: 
+    Kanał tekstowy: (tak/nie)
+    Kanał głosowy: (tak/nie)*`,
 }],
    footer: {
      text: "© Scout Robot 2020"
@@ -317,6 +365,55 @@ client.on('message', msg => {
 };
 
   }
+
+  if (msg.member.hasPermission(['MANAGE_MESSAGES']))
+{
+  const args = msg.content.slice(prefix.length).trim().split(/ +/g);
+  const command = args.shift().toLowerCase();
+
+  if (command === 'clear') {
+    const args = msg.content.split(' ').slice(1); // All arguments behind the command name with the prefix
+    const amount = Number(args.join(' ')); // Amount of messages which should be deleted
+
+    if (!amount) return msg.reply('Nie podałeś liczby wiadomości do usunięcia'); // Checks if the `amount` parameter is given
+    if (isNaN(amount)) return msg.reply('Podaj prawidłową liczbę wiadomości'); // Checks if the `amount` parameter is a number. If not, the command throws an error
+
+    if (amount > 100) return msg.reply('Nie możesz usunąć więcej niż 100 wiadomości na raz!'); // Checks if the `amount` integer is bigger than 100
+    if (amount < 1) return msg.reply('Musisz usunąć minimum 1 wiadomość!'); // Checks if the `amount` integer is smaller than 1
+      msg.delete();
+      msg.channel.messages.fetch({ limit: amount }).then(messages => { // Fetches the messages
+      msg.channel.bulkDelete(messages // Bulk deletes all messages that have been fetched and are not older than 14 days (due to the Discord API)
+    ).catch(console.error)});
+    msg.channel.send(`:recycle: **Usunięto ${amount} wiadomości.**`).then(message => {
+      message.delete({timeout:5000});
+    });      
+  };
+
+  if (command === 'censore')
+  {
+    if (!args)
+    {
+      msg.reply("brak argumentu");
+    }
+    else
+    {
+      let censoredID = msg.content.split(' ').slice(1);
+    msg.delete();
+    msg.channel.messages.fetch(`${censoredID}`)
+    .then(message => {
+    message.delete().then(msg.channel.send(`${client.emojis.cache.find(emoji => emoji.name === 'weewoo')} ***Ocenzurowano wiadomość.***`).then(info => {info.delete({timeout: 2000})}))
+    }).catch(err => {
+      msg.reply(`:x:***nie można usunąć wiadomości.***`).then(replyMsg => {replyMsg.delete({timeout:2000})});
+      console.error(err);
+    });}
+  };
+
+  if(command === "say"){
+    let text = args.join(" ");
+    msg.delete();
+    msg.channel.send(text);
+};
+};
 }
   else return;
   });
@@ -324,7 +421,7 @@ client.on('message', msg => {
 //User commands  
 
 client.on('message', msg => {
-
+    /*
     if(msg.content.includes(`co?`))
     {
       giphy.search('gifs', {"q": "meat gif"})
@@ -338,6 +435,7 @@ client.on('message', msg => {
               msg.channel.send('O nie! Wystąpił błąd przy wczytywaniu GIFa :sob:');
           })
     };
+    */
 
     if (msg.content.startsWith(prefix) && !msg.author.bot)
     {
@@ -360,13 +458,13 @@ client.on('message', msg => {
     if(command === 'paulina')
     {
       msg.delete();
-      msg.channel.send('${client.emojis.cache.find(emoji => emoji.name === "popcornDS")} <@534774314369810454> **puścisz nam jakąś bajkę???** :pleading_face:')
+      msg.channel.send(`${client.emojis.cache.find(emoji => emoji.name === "popcornDS")} <@534774314369810454> **puścisz nam jakąś bajkę???** :pleading_face:`)
     };
 
     if(command === 'hania')
     {
       msg.delete();
-      msg.channel.send('${client.emojis.cache.find(emoji => emoji.name === "rusParrot")} <@590272661087584357> **давайте сделаем чат более славянским.**')
+      msg.channel.send(`${client.emojis.cache.find(emoji => emoji.name === "rusParrot")} <@590272661087584357> **давайте сделаем чат более славянским.**`)
     };
 
     if(command === 'szymon')
@@ -412,9 +510,7 @@ client.on('message', msg => {
               msg.channel.send({embed: {
                 color: 10181046,
                 title: `**Oto twój losowy gif zawierający: ${args}!**`,
-                "image": {
-                  "url": obrazek
-                },
+                image: {url: obrazek},
                 footer: {
                   text: "© Scout Robot 2020"
                 },
@@ -423,23 +519,6 @@ client.on('message', msg => {
                           }).catch(() => {
                   msg.channel.send('O nie! Wystąpił błąd przy wczytywaniu GIFa :sob:');
               });
-              
-              
-/*
-{embed: {
-                color: 10181046,
-                title: "**Oto twój losowy gif**",
-                description: `**zawierający:` + ` ${args}` +`!**`,
-                fields: [{
-                    name: "**GIPHY**",
-                    value: [responseFinal.images.fixed_height.url]
-                  }
-                ],
-                footer: {
-                  text: "© Scout Robot 2020"
-                }
-                }}
-*/
     };
 
     //Funkcja losująca liczby
