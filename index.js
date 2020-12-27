@@ -16,7 +16,8 @@ const config = {
 
 //Giphy setup
 
-var GphApiClient = require('giphy-js-sdk-core')
+var GphApiClient = require('giphy-js-sdk-core');
+const { error } = require('console');
 giphy = GphApiClient(config.giphyToken)
 
 //Starting Bot
@@ -412,16 +413,71 @@ if(command === 'priv') {
     let text = args.join(" ");
     msg.delete();
     msg.channel.send(text);
-};
-};
+  };
+
+  if(command === "add")
+  {
+    let member = msg.mentions.members.first();
+    let roleToAdd = msg.mentions.roles.first();
+    let msgId = args[2];
+    if(member === undefined || roleToAdd === undefined)
+    {
+      msg.delete();
+      msg.reply('nieprawidłowa składnia lub brak odpowiednich danych.').then( message => {
+        message.delete({timeout:2000});
+      });
+    }
+    else
+    {
+      member.roles.add(roleToAdd).catch(console.error);
+      msg.delete();
+      msg.channel.messages.fetch(`${msgId}`).then(
+        msgToDel => {
+          msgToDel.delete().catch(console.error);
+        }
+      );
+      msg.reply(`dodano rolę ${roleToAdd} użytkownikowi ${member}. Usunięto wiadomość z ID ${msgId}`).then( infoMsg => {
+        infoMsg.delete({timeout:5000});
+      });
+    }    
+  };
+
+
+  if(command === "remove")
+  {
+    let member = msg.mentions.members.first();
+    let roleToAdd = msg.mentions.roles.first();
+    let msgId = args[2];
+    if(member === undefined || roleToAdd === undefined)
+    {
+      msg.delete();
+      msg.reply('nieprawidłowa składnia lub brak odpowiednich danych.').then( message => {
+        message.delete({timeout:2000});
+      });
+    }
+    else
+    {
+      member.roles.remove(roleToAdd).catch(console.error);
+      msg.delete();
+      msg.channel.messages.fetch(`${msgId}`).then(
+        msgToDel => {
+          msgToDel.delete().catch(console.error);
+        }
+      );
+      msg.reply(`usunięto rolę ${roleToAdd} użytkownikowi ${member}. Usunięto wiadomość z ID ${msgId}`).then( infoMsg => {
+        infoMsg.delete({timeout:5000});
+      });
+    }    
+  };
+
 }
   else return;
-  });
+  }});
   
 //User commands  
 
 client.on('message', msg => {
-    /*
+    /*aa
     if(msg.content.includes(`co?`))
     {
       giphy.search('gifs', {"q": "meat gif"})
@@ -485,7 +541,7 @@ client.on('message', msg => {
       msg.channel.send(`**${client.emojis.cache.find(emoji => emoji.name === "wumpusHype")} Autorem tego bota jest <@339111873641447424> Typ ma niezłą psychę, że mu się chciało! (serio, byłem momentami nieznośny i co chwilę wywalałem mu error do konsoli :))))**`)
     };
 
-    if(command === 'klik')
+    if(command === 'click')
     {
       msg.delete();
       msg.channel.send(`${client.emojis.cache.find(emoji => emoji.name === 'wumpusKeySlam')}`)
