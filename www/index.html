@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Scout Robot - twoj towarzysz!</title>
+  <link rel="icon" href="https://cdn.discordapp.com/avatars/746777328637575371/d3b329a97153b33ab19b6e825a1b6d16.png">
+<link rel="stylesheet" href="./style.css">
+<link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nova+Round&display=swap" rel="stylesheet"> 
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<div id="score">0</div>
+<canvas id="gameCanvas" width="100%" height="100%"></canvas>
+
+    <style>
+      #gameCanvas {
+        position: fixed;
+        display: block;
+	margin: 0px;
+        z-index:0;
+        overflow: hidden;
+      }
+
+      #score {
+      	position: fixed;
+        text-align: center;
+        width:20%;
+        color: white;
+        margin-left:40%;
+        margin-right:40%;
+        margin-top:10%;
+        font-size: 16px;
+        font-family: 'Nova Round', cursive;
+        z-index:-1;
+      }
+    </style>
+<div style="display: table; position: absolute; height: 100%; width: 100%;">
+<div style="display: table-cell; vertical-align: middle;">
+<div style="margin-left:auto; margin-right:auto; width: 400px;">
+        <div class="buttons">
+          <a href="https://github.com/iamzielus/scoutRobot" target="_blank" rel="noopener noreferrer">
+            <button class="blob-btn">
+              <table style="display: table-cell; font-family:'Nova Round', cursive;vertical-align: center; text-align:center;">
+                <tr>
+                  <th style="padding-right:20px;">
+<img src="https://cdn.discordapp.com/avatars/746777328637575371/d3b329a97153b33ab19b6e825a1b6d16.png" style="display: table-cell; text-align: center; vertical-align: middle; width: 64px;border-radius:50%;">
+  </th>
+                  <th>
+              Setup bot!
+              <span class="blob-btn__inner">
+                <span class="blob-btn__blobs">
+                  <span class="blob-btn__blob"></span>
+                  <span class="blob-btn__blob"></span>
+                  <span class="blob-btn__blob"></span>
+                  <span class="blob-btn__blob"></span>
+                  <span class="blob-btn__blob"></span>
+                  <span class="blob-btn__blob"></span>
+                </span>
+              </span>
+                </th>
+                </tr>
+              </table>
+            </button>
+          </a>
+            <br/>
+          
+          <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+            <defs>
+              <filter id="goo">
+                <feGaussianBlur in="SourceGraphic" result="blur" stdDeviation="10"></feGaussianBlur>
+                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 21 -7" result="goo"></feColorMatrix>
+                <feBlend in2="goo" in="SourceGraphic" result="mix"></feBlend>
+              </filter>
+            </defs>
+          </svg>
+</div>
+</div>
+</div>
+<!-- partial -->
+  
+</body>
+<script>
+  (function() {
+          var
+          // Obtain a reference to the canvas element using its id.
+          htmlCanvas = document.getElementById('gameCanvas'),
+          // Obtain a graphics context on the canvas element for drawing.
+          context = htmlCanvas.getContext('2d');
+  
+         // Start listening to resize events and draw canvas.
+         initialize();
+  
+         function initialize() {
+             // Register an event listener to call the resizeCanvas() function 
+             // each time the window is resized.
+             window.addEventListener('resize', resizeCanvas, false);
+             // Draw canvas border for the first time.
+             resizeCanvas();
+          }
+  
+          // Display custom canvas. In this case it's a blue, 5 pixel 
+          // border that resizes along with the browser window.
+          function redraw() {
+             context.strokeStyle = '#141414';
+             context.lineWidth = '0';
+             context.strokeRect(0, 0, window.innerWidth, window.innerHeight);
+          }
+  
+          // Runs each time the DOM window resize event fires.
+          // Resets the canvas dimensions to match window,
+          // then draws the new borders accordingly.
+          function resizeCanvas() {
+              htmlCanvas.width = window.innerWidth;
+              htmlCanvas.height = window.innerHeight;
+              redraw();
+          }
+      })();
+      const GAME_SPEED = 50;
+      const CANVAS_BORDER_COLOUR = '#141414';
+      const CANVAS_BACKGROUND_COLOUR = "#141414";
+      const SNAKE_COLOUR = '#ffffff';
+      const SNAKE_BORDER_COLOUR = SNAKE_COLOUR;
+      const FOOD_COLOUR = '#5c3896';
+      const FOOD_BORDER_COLOUR = '#fff';
+  
+      let snake = [
+        {x: 50, y: 50},
+        {x: 40, y: 50},
+        {x: 30, y: 50},
+        {x: 20, y: 50},
+        {x: 10, y: 50}
+      ]
+  
+      // The user's score
+      let score = 0;
+      // When set to true the snake is changing direction
+      let changingDirection = false;
+      // Food x-coordinate
+      let foodX;
+      // Food y-coordinate
+      let foodY;
+      // Horizontal velocity
+      let dx = 10;
+      // Vertical velocity
+      let dy = 0;
+  
+      // Get the canvas element
+      const gameCanvas = document.getElementById("gameCanvas");
+      // Return a two dimensional drawing context
+      const ctx = gameCanvas.getContext("2d");
+  
+      // Start game
+      main();
+      // Create the first food location
+      createFood();
+      // Call changeDirection whenever a key is pressed
+      document.addEventListener("keydown", changeDirection);
+  
+  
+      /**
+       * Main function of the game
+       * called repeatedly to advance the game
+       */
+      function main() {
+        // If the game ended return early to stop game
+        if (didGameEnd()) return;
+  
+        setTimeout(function onTick() {
+          changingDirection = false;
+          clearCanvas();
+          drawFood();
+          advanceSnake();
+          drawSnake();
+  
+          // Call game again
+          main();
+        }, GAME_SPEED)
+      }
+  
+      /**
+       * Change the background colour of the canvas to CANVAS_BACKGROUND_COLOUR and
+       * draw a border around it
+       */
+      function clearCanvas() {
+        //  Select the colour to fill the drawing
+        ctx.fillStyle = CANVAS_BACKGROUND_COLOUR;
+        //  Select the colour for the border of the canvas
+        ctx.strokestyle = CANVAS_BORDER_COLOUR;
+  
+        // Draw a "filled" rectangle to cover the entire canvas
+        ctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
+        // Draw a "border" around the entire canvas
+        ctx.strokeRect(0, 0, gameCanvas.width, gameCanvas.height);
+      }
+  
+      /**
+       * Draw the food on the canvas
+       */
+      function drawFood() {
+        ctx.fillStyle = FOOD_COLOUR;
+        //ctx.strokestyle = FOOD_BORDER_COLOUR;
+        ctx.fillRect(foodX, foodY, 10, 10);
+        //ctx.strokeRect(foodX, foodY, 10, 10);
+      }
+  
+      /**
+       * Advances the snake by changing the x-coordinates of its parts
+       * according to the horizontal velocity and the y-coordinates of its parts
+       * according to the vertical veolocity
+       */
+      function advanceSnake() {
+        // Create the new Snake's head
+        const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+        // Add the new head to the beginning of snake body
+        snake.unshift(head);
+  
+        const didEatFood = snake[0].x === foodX && snake[0].y === foodY;
+        if (didEatFood) {
+          // Increase score
+          score += 1;
+          // Display score on screen
+          document.getElementById('score').innerHTML = score;
+  
+          // Generate new food location
+          createFood();
+        } else {
+          // Remove the last part of snake body
+          snake.pop();
+        }
+      }
+  
+      /**
+       * Returns true if the head of the snake touched another part of the game
+       * or any of the walls
+       */
+      function didGameEnd() {
+        for (let i = 4; i < snake.length; i++) {
+          if (snake[i].x === snake[0].x && snake[i].y === snake[0].y) return true
+        }
+  
+        const hitLeftWall = snake[0].x < 0;
+        const hitRightWall = snake[0].x > gameCanvas.width - 10;
+        const hitToptWall = snake[0].y < 0;
+        const hitBottomWall = snake[0].y > gameCanvas.height - 10;
+  
+        return hitLeftWall || hitRightWall || hitToptWall || hitBottomWall
+      }
+  
+      /**
+       * Generates a random number that is a multiple of 10 given a minumum
+       * and a maximum number
+       * @param { number } min - The minimum number the random number can be
+       * @param { number } max - The maximum number the random number can be
+       */
+      function randomTen(min, max) {
+        return Math.round((Math.random() * (max-min) + min) / 10) * 10;
+      }
+  
+      /**
+       * Creates random set of coordinates for the snake food.
+       */
+      function createFood() {
+        // Generate a random number the food x-coordinate
+        foodX = randomTen(0, gameCanvas.width - 10);
+        // Generate a random number for the food y-coordinate
+        foodY = randomTen(0, gameCanvas.height - 10);
+  
+        // if the new food location is where the snake currently is, generate a new food location
+        snake.forEach(function isFoodOnSnake(part) {
+          const foodIsoNsnake = part.x == foodX && part.y == foodY;
+          if (foodIsoNsnake) createFood();
+        });
+      }
+  
+      /**
+       * Draws the snake on the canvas
+       */
+      function drawSnake() {
+        // loop through the snake parts drawing each part on the canvas
+        snake.forEach(drawSnakePart)
+      }
+  
+      /**
+       * Draws a part of the snake on the canvas
+       * @param { object } snakePart - The coordinates where the part should be drawn
+       */
+      function drawSnakePart(snakePart) {
+        // Set the colour of the snake part
+        ctx.fillStyle = SNAKE_COLOUR;
+  
+        // Set the border colour of the snake part
+        //ctx.strokestyle = SNAKE_BORDER_COLOUR;
+  
+        // Draw a "filled" rectangle to represent the snake part at the coordinates
+        // the part is located
+        ctx.fillRect(snakePart.x, snakePart.y, 10, 10);
+  
+        // Draw a border around the snake part
+        //ctx.strokeRect(snakePart.x, snakePart.y, 10, 10);
+      }
+  
+      /**
+       * Changes the vertical and horizontal velocity of the snake according to the
+       * key that was pressed.
+       * The direction cannot be switched to the opposite direction, to prevent the snake
+       * from reversing
+       * For example if the the direction is 'right' it cannot become 'left'
+       * @param { object } event - The keydown event
+       */
+      function changeDirection(event) {
+        const LEFT_KEY = 37;
+        const RIGHT_KEY = 39;
+        const UP_KEY = 38;
+        const DOWN_KEY = 40;
+        /**
+         * Prevent the snake from reversing
+         * Example scenario:
+         * Snake is moving to the right. User presses down and immediately left
+         * and the snake immediately changes direction without taking a step down first
+         */
+        if (changingDirection) return;
+        changingDirection = true;
+  
+        const keyPressed = event.keyCode;
+  
+        const goingUp = dy === -10;
+        const goingDown = dy === 10;
+        const goingRight = dx === 10;
+        const goingLeft = dx === -10;
+  
+        if (keyPressed === LEFT_KEY && !goingRight) {
+          dx = -10;
+          dy = 0;
+        }
+        if (keyPressed === UP_KEY && !goingDown) {
+          dx = 0;
+          dy = -10;
+        }
+        if (keyPressed === RIGHT_KEY && !goingLeft) {
+          dx = 10;
+          dy = 0;
+        }
+        if (keyPressed === DOWN_KEY && !goingUp) {
+          dx = 0;
+          dy = 10;
+        }
+      }
+  
+    </script>
+</html>
