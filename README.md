@@ -12,6 +12,8 @@ Installation
 ---
 Install dependencies with `npm install`
 
+Add `.env` file with your `token` inside
+
 Run bot with `node index.js`
 
 Commands list
