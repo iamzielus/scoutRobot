@@ -60,7 +60,7 @@ client.on('ready', () => {
         });
       }
     }
-  })
+  });
 });
 
 client.login(TOKEN);

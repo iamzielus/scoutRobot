@@ -1,4 +1,3 @@
-backup_index.js
 .vscode
-*.env
+.env
 *.txt
