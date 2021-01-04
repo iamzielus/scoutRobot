@@ -2,7 +2,7 @@ Scout Robot - discord bot.
 ===
 ![](https://cdn.discordapp.com/avatars/746777328637575371/d3b329a97153b33ab19b6e825a1b6d16.png)
 
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/iamzielus/scoutRobot?color=%235c3896&logoColor=%235c3896&style=for-the-badge)
+![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/iamzielus/scoutRobot?color=5c3896&include_prereleases&logoColor=5c3896&style=for-the-badge)
 
 ![GitHub issues](https://img.shields.io/github/issues/iamzielus/scoutRobot?color=%235c3896&logoColor=%235c3896&style=for-the-badge)
 
