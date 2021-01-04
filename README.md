@@ -6,7 +6,7 @@ Scout Robot - discord bot.
 
 ![GitHub issues](https://img.shields.io/github/issues/iamzielus/scoutRobot?color=%235c3896&logoColor=%235c3896&style=for-the-badge)
 
-![Website](https://img.shields.io/website?down_color=5c3896&down_message=CLICK&style=for-the-badge&up_color=5c3896&up_message=CLICK&url=https%3A%2F%2Fscoutrobot.cf)
+[![Website](https://img.shields.io/website?down_color=5c3896&down_message=CLICK&style=for-the-badge&up_color=5c3896&up_message=CLICK&url=https%3A%2F%2Fscoutrobot.cf)](https://scoutrobot.cf/)
 
 Installation
 ---
